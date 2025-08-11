@@ -555,5 +555,24 @@
       }
     });
   </script>
+  <script>
+(function () {
+  function sendHeight() {
+    var h = Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight
+    );
+    parent.postMessage({ kvHeight: h, kvSource: 'knack' }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if (window.ResizeObserver) {
+    new ResizeObserver(sendHeight).observe(document.body);
+  } else {
+    // Fallback if ResizeObserver isn't available
+    setInterval(sendHeight, 600);
+  }
+})();
+</script>
 </body>
 </html>
