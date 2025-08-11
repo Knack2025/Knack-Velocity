@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Knack Velocity Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --brand-coral:#FF7052;
+      --bg:#ffffff;
+      --text:#000000;
+      --panel:#efefef;
+      --muted:#444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Work Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height:1.7;
+      font-size:18px; /* +2 from typical 16 */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      margin:0;
+    }
+    .container{max-width: 980px; margin: 0 auto; padding: 24px 20px}
+    /* Landing */
+    .landing{text-align:center; padding: 40px 0 12px}
+    .title{font-size: clamp(34px, 4vw, 52px); font-weight:700; letter-spacing:.2px; margin:0 0 10px}
+    .subtitle{font-size: clamp(20px, 2.4vw, 24px); color: var(--muted); margin:0 0 14px; font-weight:600}
+    .description{max-width:760px; margin:0 auto 22px}
+    .stats{
+      display:flex; gap:18px; justify-content:center; margin: 16px auto 24px;
+      background: var(--panel); padding: 14px 16px; border-radius: 14px;
+      border: 1px solid #ddd;
+      max-width: 460px;
+    }
+    .stat{text-align:center}
+    .stat-number{font-weight:700; color: var(--brand-coral); font-size: 22px}
+    .stat-label{font-size: 14px; color:#666}
+    .start-button{
+      background: var(--brand-coral);
+      color:#fff; font-weight:700; font-size: 18px;
+      border:none; border-radius:12px; padding: 16px 26px; cursor:pointer;
+      box-shadow: 0 8px 24px rgba(255,112,82,.18);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .start-button:hover{ transform: translateY(-1px) }
+    /* Assessment */
+    .assessment{ display:none }
+    .progress-container{ margin: 10px 0 18px }
+    .progress-bar{ width:100%; height: 10px; background:#ddd; border-radius:6px; overflow:hidden }
+    .progress-fill{ height:100%; background: var(--brand-coral); width:0%; transition: width .3s ease }
+    .section-header{ display:flex; align-items:center; gap:12px; margin: 8px 0 14px }
+    .section-icon{ width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; background: var(--panel); font-size: 22px }
+    .section-title{ font-size: 24px; font-weight:700 }
+    .question-container{ background: var(--panel); border:1px solid #ddd; border-radius:16px; padding:18px }
+    .question{ margin-bottom:16px }
+    .question h3{ font-size: 20px; margin:0 0 8px; font-weight:700 }
+    .option{
+      display:flex; align-items:center; gap:12px; padding:12px; margin: 10px 0;
+      background: #fff; border: 2px solid #fff; border-radius:12px; cursor:pointer;
+      transition: all .2s ease; font-size: 18px;
+    }
+    .option:hover{ border-color: #ddd; background:#fafafa }
+    .option.selected{ border-color: var(--brand-coral); background: #fff5f2 }
+    .score-badge{
+      width: 36px; height:36px; border-radius:50%; background: #fff5f2;
+      display:flex; align-items:center; justify-content:center; color: var(--brand-coral); font-weight:700
+    }
+    .navigation{ display:flex; justify-content:space-between; margin-top: 16px }
+    .btn{ padding: 14px 20px; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size: 18px }
+    .btn-primary{ background: var(--brand-coral); color:#fff }
+    .btn-secondary{ background: #e6e6e6; color:#111 }
+    .btn:disabled{ opacity:.6; cursor:not-allowed }
+    /* Results */
+    .results{ display:none; text-align:center }
+    .score-circle{ width: 220px; height:220px; border-radius:50%;
+      background: conic-gradient(var(--brand-coral) 0deg, #f59e0b 90deg, #10b981 180deg, #3b82f6 270deg, var(--brand-coral) 360deg);
+      display:flex; align-items:center; justify-content:center; margin: 24px auto;
+    }
+    .score-inner{ width:176px; height:176px; background: #fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; border: 8px solid #ffe3dc }
+    .final-score{ font-size:46px; font-weight:800; color: var(--brand-coral) }
+    .panel{ background: var(--panel); border:1px solid #ddd; border-radius:16px; padding:18px }
+    .grid{ display:grid; gap:12px }
+    @media (min-width: 720px){ .grid-2{ grid-template-columns: 1fr 1fr } }
+    /* simple inputs */
+    .input{
+      width:100%; margin: 8px 0 16px; padding: 12px 14px; font: inherit; color: #111;
+      background: #fff; border:1px solid #ddd; border-radius:10px;
+    }
+    label{ display:block; color:#111; font-size: 14px; margin-top: 6px; font-weight:600 }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Landing -->
+    <div id="landing" class="landing">
+      <h1 class="title">Knack Velocity</h1>
+      <h2 class="subtitle">AI‑Powered Partner Performance Assessment</h2>
+      <p class="description">Discover hidden bottlenecks slowing your partner ecosystem and get a custom roadmap to accelerate revenue growth by 40%+ in the next 12 months.</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-number">5</div><div class="stat-label">Minutes</div></div>
+        <div class="stat"><div class="stat-number">20</div><div class="stat-label">Questions</div></div>
+        <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Free</div></div>
+      </div>
+      <button class="start-button">Start Your Velocity Assessment →</button>
+      <p style="color:#666; margin-top: 10px">Used by 200+ companies including Microsoft, Salesforce, and HubSpot partners</p>
+    </div>
+
+    <!-- Assessment -->
+    <div id="assessment" class="assessment">
+      <div class="progress-container">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="section-header">
+        <div class="section-icon" id="sectionIcon">🤖</div>
+        <div class="section-title" id="sectionTitle">AI & Data Intelligence</div>
+      </div>
+      <div class="question-container" id="questionContainer"></div>
+      <div class="navigation">
+        <button class="btn btn-secondary" id="prevBtn" style="display:none">← Previous</button>
+        <button class="btn btn-primary" id="nextBtn">Next →</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="results">
+      <h2 class="title" style="font-size:28px">Your Knack Velocity Score</h2>
+      <div class="score-circle"><div class="score-inner">
+        <div class="final-score" id="finalScore">0</div>
+        <div style="color:#111; font-weight:700">/100</div>
+      </div></div>
+
+      <div id="summaryContent" style="max-width:760px; margin: 0 auto 16px"></div>
+
+      <div class="panel" style="text-align:center; margin: 16px 0 20px">
+        <h3 style="color:#111; margin-bottom:8px; font-weight:700">Want the Complete Picture?</h3>
+        <p style="color:#333; margin-bottom: 12px">Get a detailed 5‑page strategic analysis with recommendations, competitive benchmarks, and a custom 90‑day action plan tailored to your organization.</p>
+        <button class="btn btn-primary" id="ctaAnalysis">Get My Strategic Analysis</button>
+      </div>
+
+      <div class="panel" id="leadForm" style="display:none; text-align:left; max-width:760px; margin: 0 auto">
+        <h3 style="text-align:center; margin-bottom: 8px; color:#111; font-weight:700">Get Your Strategic Analysis</h3>
+        <p style="text-align:center; margin-bottom: 14px; color:#333">Unlock your personalized strategic analysis with competitive benchmarks and actionable recommendations.</p>
+        <form id="leadFormEl">
+          <div class="grid grid-2">
+            <div>
+              <label>First Name *</label>
+              <input class="input" type="text" name="firstName" required placeholder="John" />
+            </div>
+            <div>
+              <label>Last Name *</label>
+              <input class="input" type="text" name="lastName" required placeholder="Smith" />
+            </div>
+          </div>
+          <div>
+            <label>Business Email *</label>
+            <input class="input" type="email" name="email" required placeholder="john.smith@company.com" />
+          </div>
+          <div>
+            <label>Company *</label>
+            <input class="input" type="text" name="company" required placeholder="Your Company" />
+          </div>
+          <div class="grid grid-2">
+            <div>
+              <label>Job Title *</label>
+              <input class="input" type="text" name="title" required placeholder="VP of Partnerships" />
+            </div>
+            <div>
+              <label>Partner Count</label>
+              <select class="input" name="partnerCount">
+                <option value="">Select range</option>
+                <option value="1-10">1–10 partners</option>
+                <option value="11-50">11–50 partners</option>
+                <option value="51-200">51–200 partners</option>
+                <option value="200+">200+ partners</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 10px">Send My Strategic Analysis</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Full questionnaire — 4 sections × 5 questions; all scores 25/50/75/100
+    const sections = [
+      {
+        title: "AI & Data Intelligence",
+        icon: "🤖",
+        questions: [
+          {
+            text: "How effectively does your organization leverage AI and predictive analytics for partner relationship management?",
+            options: [
+              { score: 25, text: "We primarily use manual processes and basic CRM functionality" },
+              { score: 50, text: "We have some automation but limited AI/ML capabilities" },
+              { score: 75, text: "We use AI for predictive partner scoring and opportunity matching" },
+              { score: 100, text: "We have fully integrated AI that optimizes partner performance in real-time" }
+            ]
+          },
+          {
+            text: "How well do you leverage zero-party and first-party data for partner ecosystem insights?",
+            options: [
+              { score: 25, text: "Limited data collection, mostly relying on third-party sources" },
+              { score: 50, text: "Basic first-party data collection but poor integration" },
+              { score: 75, text: "Strong first-party data strategy with partner data sharing" },
+              { score: 100, text: "Comprehensive zero/first-party data platform driving partner insights" }
+            ]
+          },
+          {
+            text: "How sophisticated is your partner performance attribution and analytics?",
+            options: [
+              { score: 25, text: "Basic reporting with limited visibility into partner impact" },
+              { score: 50, text: "Standard dashboards but no predictive analytics" },
+              { score: 75, text: "Advanced analytics with multi-touch attribution modeling" },
+              { score: 100, text: "Real-time predictive analytics with automated optimization" }
+            ]
+          },
+          {
+            text: "How effectively do you use technology to enable partner self-service and automation?",
+            options: [
+              { score: 25, text: "Manual processes requiring significant human intervention" },
+              { score: 50, text: "Basic partner portal with limited self-service capabilities" },
+              { score: 75, text: "Comprehensive self-service platform with automated workflows" },
+              { score: 100, text: "Fully automated partner experience with AI-driven recommendations" }
+            ]
+          },
+          {
+            text: "How prepared is your data infrastructure for future partnership technologies?",
+            options: [
+              { score: 25, text: "Legacy systems with limited integration capabilities" },
+              { score: 50, text: "Some modern systems but fragmented architecture" },
+              { score: 75, text: "Modern, API-first architecture ready for new technologies" },
+              { score: 100, text: "Future-ready platform already integrating emerging technologies" }
+            ]
+          }
+        ]
+      },
+      {
+        title: "Partner Ecosystem Design",
+        icon: "🌐",
+        questions: [
+          {
+            text: "How sophisticated is your partner segmentation and personalization strategy?",
+            options: [
+              { score: 25, text: "One-size-fits-all approach with basic tiering" },
+              { score: 50, text: "Basic segmentation by revenue or geography" },
+              { score: 75, text: "Dynamic segmentation based on multiple behavioral factors" },
+              { score: 100, text: "AI-driven micro-segmentation with personalized partner journeys" }
+            ]
+          },
+          {
+            text: "How effectively do you manage partner ecosystem orchestration and co-innovation?",
+            options: [
+              { score: 25, text: "Minimal partner collaboration, mostly transactional" },
+              { score: 50, text: "Some joint initiatives but limited strategic alignment" },
+              { score: 75, text: "Structured co-innovation programs with key partners" },
+              { score: 100, text: "Fully orchestrated ecosystem with shared innovation roadmaps" }
+            ]
+          },
+          {
+            text: "How comprehensive is your partner onboarding and enablement program?",
+            options: [
+              { score: 25, text: "Basic orientation with limited ongoing support" },
+              { score: 50, text: "Standard training program but one-size-fits-all approach" },
+              { score: 75, text: "Tailored onboarding with role-based enablement tracks" },
+              { score: 100, text: "AI-personalized learning paths with continuous skill development" }
+            ]
+          },
+          {
+            text: "How effectively do you manage partner conflict and channel harmony?",
+            options: [
+              { score: 25, text: "Frequent conflicts with reactive resolution" },
+              { score: 50, text: "Some conflict management processes but inconsistent application" },
+              { score: 75, text: "Proactive conflict prevention with clear territory rules" },
+              { score: 100, text: "AI-driven territory optimization preventing conflicts before they occur" }
+            ]
+          },
+          {
+            text: "How well does your partner program adapt to changing market conditions?",
+            options: [
+              { score: 25, text: "Rigid program structure with infrequent updates" },
+              { score: 50, text: "Annual program reviews with limited flexibility" },
+              { score: 75, text: "Quarterly program optimization based on market feedback" },
+              { score: 100, text: "Dynamic program that continuously evolves with market conditions" }
+            ]
+          }
+        ]
+      },
+      {
+        title: "Revenue Operations & Growth",
+        icon: "📈",
+        questions: [
+          {
+            text: "How mature is your revenue attribution and partner ROI measurement?",
+            options: [
+              { score: 25, text: "Basic reporting with limited attribution modeling" },
+              { score: 50, text: "Multi-touch attribution but incomplete partner impact view" },
+              { score: 75, text: "Advanced attribution with clear partner value measurement" },
+              { score: 100, text: "Real-time revenue attribution with predictive partner performance" }
+            ]
+          },
+          {
+            text: "How well do you enable partner-led growth and expansion opportunities?",
+            options: [
+              { score: 25, text: "Partners primarily function as lead sources" },
+              { score: 50, text: "Some partner-driven expansion but limited enablement" },
+              { score: 75, text: "Strong partner enablement with clear expansion pathways" },
+              { score: 100, text: "Partners are primary growth engine with full expansion capabilities" }
+            ]
+          },
+          {
+            text: "How sophisticated is your partner deal registration and opportunity management?",
+            options: [
+              { score: 25, text: "Manual processes with limited visibility" },
+              { score: 50, text: "Basic deal registration but poor pipeline management" },
+              { score: 75, text: "Automated deal registration with integrated pipeline tracking" },
+              { score: 100, text: "AI-optimized opportunity matching with predictive deal scoring" }
+            ]
+          },
+          {
+            text: "How effectively do you measure and optimize partner lifetime value (PLV)?",
+            options: [
+              { score: 25, text: "Focus primarily on short-term revenue metrics" },
+              { score: 50, text: "Basic PLV calculations but limited optimization" },
+              { score: 75, text: "Sophisticated PLV modeling with targeted investment strategies" },
+              { score: 100, text: "Dynamic PLV optimization with automated resource allocation" }
+            ]
+          },
+          {
+            text: "How well do you leverage partner data for market intelligence and competitive insights?",
+            options: [
+              { score: 25, text: "Limited use of partner data for strategic insights" },
+              { score: 50, text: "Basic market reporting but limited competitive intelligence" },
+              { score: 75, text: "Strong market intelligence with competitive analysis capabilities" },
+              { score: 100, text: "Real-time market intelligence driving strategic decisions" }
+            ]
+          }
+        ]
+      },
+      {
+        title: "Adaptive Organization & Talent",
+        icon: "🏗️",
+        questions: [
+          {
+            text: "How agile is your partner organization in responding to market changes?",
+            options: [
+              { score: 25, text: "Rigid structure with slow response to market shifts" },
+              { score: 50, text: "Some flexibility but limited cross-functional collaboration" },
+              { score: 75, text: "Agile team structure with rapid iteration capabilities" },
+              { score: 100, text: "Fully adaptive organization with continuous evolution" }
+            ]
+          },
+          {
+            text: "How effectively do you leverage diverse talent and skills for partner success?",
+            options: [
+              { score: 25, text: "Traditional hiring with limited diversity focus" },
+              { score: 50, text: "Some diversity initiatives but inconsistent execution" },
+              { score: 75, text: "Strong diversity strategy with measurable outcomes" },
+              { score: 100, text: "Diversity-first culture driving innovation and partner success" }
+            ]
+          },
+          {
+            text: "How well-defined are your partner team roles, responsibilities, and accountability measures?",
+            options: [
+              { score: 25, text: "Unclear roles with overlapping responsibilities" },
+              { score: 50, text: "Basic role definitions but limited accountability" },
+              { score: 75, text: "Clear RACI matrix with defined success metrics" },
+              { score: 100, text: "Dynamic role optimization with AI-driven performance insights" }
+            ]
+          },
+          {
+            text: "How effectively do you scale your partner organization capabilities?",
+            options: [
+              { score: 25, text: "Linear scaling requiring proportional headcount increases" },
+              { score: 50, text: "Some process automation but limited leverage" },
+              { score: 75, text: "Scalable processes with technology multipliers" },
+              { score: 100, text: "Exponential scaling through AI and ecosystem orchestration" }
+            ]
+          },
+          {
+            text: "How well do you develop and retain top partner management talent?",
+            options: [
+              { score: 25, text: "High turnover with limited development programs" },
+              { score: 50, text: "Basic training programs but inconsistent career paths" },
+              { score: 75, text: "Structured career development with mentorship programs" },
+              { score: 100, text: "Industry-leading talent development with high retention rates" }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // State
+    let currentSection = 0;
+    let answers = {};
+
+    function renderSection(){
+      const section = sections[currentSection];
+      document.getElementById('sectionIcon').textContent = section.icon;
+      document.getElementById('sectionTitle').textContent = section.title;
+
+      const progress = ((currentSection+1)/sections.length)*100;
+      document.getElementById('progressFill').style.width = progress + '%';
+
+      const container = document.getElementById('questionContainer');
+      container.innerHTML = '';
+
+      section.questions.forEach((question, qIdx)=>{
+        const div = document.createElement('div'); div.className='question';
+        let html = `<h3>${question.text}</h3>`;
+        const qKey = `${currentSection}-${qIdx}`;
+
+        question.options.forEach(opt=>{
+          const selected = answers[qKey] === opt.score;
+          html += `
+            <div class="option ${selected ? 'selected':''}" onclick="selectOption('${qKey}', ${opt.score}, this)">
+              <div class="score-badge">${opt.score}</div>
+              <div>${opt.text}</div>
+            </div>`;
+        });
+
+        div.innerHTML = html;
+        container.appendChild(div);
+      });
+
+      // nav buttons
+      const prevBtn = document.getElementById('prevBtn');
+      prevBtn.style.display = currentSection>0 ? 'inline-block' : 'none';
+      document.getElementById('nextBtn').textContent = currentSection < sections.length-1 ? 'Next →' : 'View Results';
+    }
+
+    function selectOption(qKey, score, el){
+      const question = el.parentNode;
+      question.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+      el.classList.add('selected');
+      answers[qKey] = score;
+    }
+
+    function nextSection(){
+      const totalQs = sections[currentSection].questions.length;
+      let answered = 0;
+      for(let i=0;i<totalQs;i++){
+        if(answers[`${currentSection}-${i}`]) answered++;
+      }
+      if(answered < totalQs){ alert('Please answer all questions before proceeding.'); return; }
+
+      if(currentSection < sections.length-1){ currentSection++; renderSection(); }
+      else{ showResults(); }
+    }
+
+    function previousSection(){
+      if(currentSection>0){ currentSection--; renderSection(); }
+    }
+
+    function showResults(){
+      const raw = Object.values(answers).reduce((a,b)=>a+b,0); // max 2000
+      const normalized = Math.round((raw / 2000) * 100);
+      const sectionScores = [];
+      for(let s=0; s<sections.length; s++){
+        let sectionTotal = 0;
+        for(let q=0; q<sections[s].questions.length; q++){
+          const key = `${s}-${q}`;
+          if(answers[key]) sectionTotal += answers[key];
+        }
+        sectionScores.push(Math.round((sectionTotal / 500) * 100));
+      }
+
+      document.getElementById('assessment').style.display='none';
+      document.getElementById('results').style.display='block';
+      document.getElementById('finalScore').textContent = normalized;
+      document.getElementById('summaryContent').innerHTML = generateSummary(normalized, sectionScores);
+    }
+
+    function rating(score){
+      if(score>=85) return "High Performing";
+      if(score>=65) return "Mature";
+      if(score>=40) return "Developing";
+      return "Immature";
+    }
+
+    function generateSummary(totalScore, sectionScores){
+      const quadrantNames = ["Technology & Data","Partner Program Design","Marketing & Sales Enablement","Operational Readiness"];
+      let low = 0; for(let i=1;i<sectionScores.length;i++){ if(sectionScores[i] < sectionScores[low]) low = i; }
+      const row = (name, score)=>`
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px; padding:10px 0; border-bottom:1px solid #ddd">
+          <div>${name}</div>
+          <div style="text-align:center; color: var(--brand-coral); font-weight:700">${score}/100</div>
+        </div>`;
+      return `
+        <div class="panel" style="margin-bottom:14px">
+          <h3 style="margin-bottom:8px; font-weight:700">Your Ecosystem Maturity Overview</h3>
+          <div class="grid grid-2">
+            <div><div style="color:#666; font-size:14px">Overall Score</div><div style="font-size:28px; font-weight:800">${totalScore}/100</div></div>
+            <div><div style="color:#666; font-size:14px">Overall Rating</div><div style="font-size:20px; font-weight:700; color: var(--brand-coral)">${rating(totalScore)}</div></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:14px">
+          <div style="font-weight:700; margin-bottom:8px">Quadrant Performance Breakdown</div>
+          ${row("Technology & Data", sectionScores[0])}
+          ${row("Partner Program Design", sectionScores[1])}
+          ${row("Marketing & Sales Enablement", sectionScores[2])}
+          ${row("Operational Readiness", sectionScores[3])}
+        </div>
+        <div class="panel" style="margin-bottom:14px">
+          <div style="font-weight:700; margin-bottom:8px">Your Next Move</div>
+          <p>Start with a focused strategy session in your lowest-scoring quadrant: <strong style="color: var(--brand-coral)">${quadrantNames[low]}</strong> (${sectionScores[low]}/100). Strengthening this foundation will amplify performance across your entire partner ecosystem.</p>
+        </div>`;
+    }
+
+    function showLeadForm(){
+      document.getElementById('leadForm').style.display='block';
+      document.getElementById('leadForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Safety binder for all interactive buttons
+    document.addEventListener('DOMContentLoaded', function(){
+      const startBtn = document.querySelector('.start-button');
+      if(startBtn){
+        startBtn.addEventListener('click', function(e){
+          e.preventDefault();
+          document.getElementById('landing').style.display='none';
+          document.getElementById('assessment').style.display='block';
+          // bind nav buttons
+          document.getElementById('nextBtn').addEventListener('click', nextSection);
+          document.getElementById('prevBtn').addEventListener('click', previousSection);
+          renderSection();
+        });
+      }
+      const cta = document.getElementById('ctaAnalysis');
+      if(cta){
+        cta.addEventListener('click', function(){
+          document.getElementById('leadForm').style.display='block';
+          document.getElementById('leadForm').scrollIntoView({ behavior:'smooth' });
+        });
+      }
+      const leadFormEl = document.getElementById('leadFormEl');
+      if(leadFormEl){
+        leadFormEl.addEventListener('submit', function(e){
+          e.preventDefault();
+          const fd = new FormData(leadFormEl);
+          const data = Object.fromEntries(fd.entries());
+          data.score = document.getElementById('finalScore').textContent;
+          data.answers = answers;
+          data.timestamp = new Date().toISOString();
+          console.log("Lead Data", data);
+          alert(`Thank you ${data.firstName}! Your strategic analysis will be sent to ${data.email}.`);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
